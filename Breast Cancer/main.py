@@ -132,25 +132,23 @@ for epoch in range (1,20000,1):
 # =================
 # TESTING
 # =================
-for i in range(0,114,1):
-    # Layer 1
-    intermediate_output1 = X_train_scaled @ W1 + b1
-    output_1 = relu(intermediate_output1)
 
-    # Layer 2
-    intermediate_output2 = output_1 @ W2 + b2
-    output_2 = relu(intermediate_output2)
+# Layer 1
+intermediate_output1 = X_test_scaled @ W1 + b1
+output_1 = relu(intermediate_output1)
 
-    # Layer 3
-    intermediate_output3 = output_2 @ W3 + b3
-    predicted = sigmoid(intermediate_output3)
+# Layer 2
+intermediate_output2 = output_1 @ W2 + b2
+output_2 = relu(intermediate_output2)
 
-    # Training loss
-    loss = BCE(y_train, predicted)
-    total_loss = total_loss + loss
+# Layer 3
+intermediate_output3 = output_2 @ W3 + b3
+predicted = sigmoid(intermediate_output3)
 
-loss_percentage = total_loss/114
-print(f"The loss for this network is --> {loss_percentage}%")
+# Test loss
+loss = BCE(y_test, predicted)
+
+print(f"The test loss for this network is --> {loss}")
     
 
 
