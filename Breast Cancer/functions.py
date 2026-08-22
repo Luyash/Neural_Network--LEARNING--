@@ -3,32 +3,25 @@ import math
 
 
 # Relu ---> negative and 0 return 0 natra return input number
-def relu(x):   
-    if x <= 0:
-        return 0
-    else:
-        return x
+def relu(x):
+    return np.maximum(0, x)
 
 
 # Sigmoid function --> y = 1/ ( 1+ e^(-x) )
-def sigmoid(x):    
-    y = 1 + math.exp(-x)
-    y = 1 / y
-    return y
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 
 # Binary Cross Entropy Loss Function (BCE):
 # Used when outputs are 2 loke 0 and 1 or yes and no type
 def BCE(actual, predicted):
 
-    total_loss = 0
+    predicted = np.clip(predicted, 1e-15, 1 - 1e-15)
 
-    for i in range(len(actual)):
-        loss = -(actual[i] * math.log(predicted[i]) +(1 - actual[i]) * math.log(1 - predicted[i]))
+    loss = -(actual * np.log(predicted) +
+             (1 - actual) * np.log(1 - predicted))
 
-        total_loss += loss
-
-    return total_loss / len(actual) # Average returning
+    return np.mean(loss) # Average returning
 
 #==============
 # DERIVATIVES
@@ -44,7 +37,4 @@ def derivative_BCE(actual, predicted):
     return d_predicted
 
 def derivative_reLu(x):
-    if(x<= 0):
-        return 0
-    else:
-        return 1
+    return (x > 0).astype(float)

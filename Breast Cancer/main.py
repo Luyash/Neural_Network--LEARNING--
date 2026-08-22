@@ -2,20 +2,21 @@ import zipfile
 import numpy as np
 from functions import *
 
-with zipfile.ZipFile("breast+cancer+wisconsin+diagnostic.zip", "r") as zip_file:
+with zipfile.ZipFile(
+    "Breast Cancer/breast+cancer+wisconsin+diagnostic.zip",
+    "r"
+) as zip_file:
     zip_file.extract("wdbc.data")
 
 data = np.genfromtxt(
     "wdbc.data",
     delimiter=",",
-    dtype=None,
-    encoding="utf-8"
+    dtype=str,
 )
 
 # Getting data Inputs and Output:
-X = data[:, 2:32]   # columns 2 through 31 → 30 inputs
-
-y = data[:, 1:2]    # column 1 → diagnosis
+X = data[:, 2:32].astype(float)  # columns 2 through 31 → 30 inputs
+y = np.where(data[:, 1:2] == "M", 1, 0).astype(float)    # column 1 → diagnosis
 
 # Adding randomizer for the input data like biccha biccha bata 80% and 20%
 indices = np.random.permutation(len(X))
@@ -77,37 +78,76 @@ for epoch in range (1,20000,1):
     # Loss for the predicted values:
     loss = BCE(y_train , predicted)
 
-    # =====================
+    # ======================
     # BACKPROPAGATION
     # =====================
 
-    d_predicted = derivative_BCE(y_train, predicted)  # dloss/ dpredicted
+    # Output layer
+    # BCE + Sigmoid simplifies to:
+    d_intermediate_output3 = predicted - y_train
 
-    d_sigmoid3 = derivative_sigmoid(intermediate_output3)
-
-    dW3 = intermediate_output3.T @ d_predicted
-    db3 = np.sum(d_predicted , axis = 0)
-
-    d_output2 = derivative_reLu(output_2)
-
-    dW2 = intermediate_output2.T @ d_output2
-    db2 = np.sum(d_output2 , axis = 0)
-
-    d_output1 = derivative_reLu(output_1)
-
-    dW1 = intermediate_output1.T @ d_output1
-    db1 = np.sum(d_output1 , axis = 0)
+    # Gradients for W3 and b3
+    dW3 = output_2.T @ d_intermediate_output3
+    db3 = np.sum(d_intermediate_output3, axis=0)
 
 
+    # Send gradient backwards through W3
+    d_output2 = d_intermediate_output3 @ W3.T
+
+    # ReLU derivative
+    d_intermediate_output2 = d_output2 * derivative_reLu(intermediate_output2)
+
+    # Gradients for W2 and b2
+    dW2 = output_1.T @ d_intermediate_output2
+    db2 = np.sum(d_intermediate_output2, axis=0)
+
+
+    # Send gradient backwards through W2
+    d_output1 = d_intermediate_output2 @ W2.T
+
+    # ReLU derivative
+    d_intermediate_output1 = d_output1 * derivative_reLu(intermediate_output1)
+
+    # Gradients for W1 and b1
+    dW1 = X_train_scaled.T @ d_intermediate_output1
+    db1 = np.sum(d_intermediate_output1, axis=0)
+
+
+    # Gradient Descent
+    # ==============================
+    # UPDATING WEIGHTS AND BIASES
+    # ==============================
+
+    W3 = W3 - learning_rate * dW3
+    b3 = b3 - learning_rate * db3
+
+    W2 = W2 - learning_rate * dW2
+    b2 = b2 - learning_rate * db2
+
+    W1 = W1 - learning_rate * dW1
+    b1 - b1 - learning_rate * db1
+
+
+
+# =================
+# TESTING
+# =================
+
+# Layer 1
+intermediate_output1 = X_test_scaled @ W1 + b1
+output_1 = relu(intermediate_output1)
+
+# Layer 2
+intermediate_output2 = output_1 @ W2 + b2
+output_2 = relu(intermediate_output2)
+
+# Layer 3
+intermediate_output3 = output_2 @ W3 + b3
+predicted = sigmoid(intermediate_output3)
+
+# Test loss
+loss = BCE(y_test, predicted)
+
+loss_percentage = loss * 100
+print(f"The test loss for this network is --> {loss_percentage: .2f}%")
     
-
-
-
-
-
-
-
-
-
-
-
