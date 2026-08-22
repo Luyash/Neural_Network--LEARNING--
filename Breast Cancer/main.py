@@ -148,16 +148,6 @@ predicted = sigmoid(intermediate_output3)
 # Test loss
 loss = BCE(y_test, predicted)
 
-print(f"The test loss for this network is --> {loss}")
+loss_percentage = loss * 100
+print(f"The test loss for this network is --> {loss_percentage: .2f}%")
     
-
-
-
-
-
-
-
-
-
-
-
